@@ -1,138 +1,78 @@
-# GoVeda Patent MCP Server
+# GoVeda Patent MCP
 
-AI-powered patent intelligence for search & analysis via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+Search patent records, read patent content, follow citations, and research prior art through GoVeda's hosted [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) service.
 
-Search and analyze **220M+ global patents** with semantic search, prior art discovery, novelty/patentability reports, and full patent content retrieval — directly from Claude, ChatGPT, and other MCP-compatible AI assistants.
+- Endpoint: `https://mcp.goveda.com/mcp`
+- Transport: Streamable HTTP
+- Authentication: browser OAuth sign-in with a GoVeda account
 
-**Endpoint:** `https://mcp.goveda.com/mcp`
-**Transport:** Streamable HTTP
-**Authentication:** OAuth 2.0 (automatic browser sign-in)
+This repository contains the Cursor plugin, connection configuration, and documentation. It does not contain the hosted server. No Node.js, bridge process, API key, or token is required in the Cursor configuration.
 
-## Quick Start
+## Connect Cursor
 
-### Claude Desktop / claude.ai
-
-Settings > Connectors > Add custom connector:
-
-- **Name:** GoVeda Patent
-- **URL:** `https://mcp.goveda.com/mcp`
-
-OAuth authentication opens automatically in your browser.
-
-### Claude Code
-
-```bash
-claude mcp add goveda-patent --transport http https://mcp.goveda.com/mcp
-```
-
-### ChatGPT
-
-Settings > Apps > Advanced > Enable Developer Mode. Add MCP server with URL `https://mcp.goveda.com/mcp` and OAuth authentication.
-
-### Cursor / Windsurf (mcp-remote bridge)
-
-For clients that only support stdio transport:
+For a project, merge the following entry into `.cursor/mcp.json`. For all projects, use `~/.cursor/mcp.json`. Preserve any existing server entries.
 
 ```json
 {
   "mcpServers": {
     "goveda-patent": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.goveda.com/mcp"]
-    }
-  }
-}
-```
-
-Requires Node.js installed. `mcp-remote` handles OAuth and protocol bridging.
-
-### VS Code / GitHub Copilot
-
-Add to `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "goveda-patent": {
-      "type": "streamable-http",
       "url": "https://mcp.goveda.com/mcp"
     }
   }
 }
 ```
 
-## Tools
+Open Cursor's **Customize** page, locate the MCP server, enable it if needed, and complete **Connect** / browser sign-in when prompted. Review GoVeda's consent screen before approving. Cursor discovers the OAuth configuration; do not add an Authorization header or embed OAuth client secrets.
 
-### Search & Discovery
+An administrator may restrict MCP servers or plugin imports. See [Cursor's MCP documentation](https://cursor.com/docs/mcp).
 
-| Tool | Description | Cost |
-|------|-------------|------|
-| `search_patents` | Semantic search across 220M+ patents by technology description or concept | ~50-320 credits |
-| `get_prior_art` | Find prior art for a known patent by publication number | ~690 credits |
-| `get_search_status` | Poll async search/prior art progress and retrieve results | Free |
+### Cursor plugin preview
 
-### Reports
+The plugin manifest is `.cursor-plugin/plugin.json`; the remote server configuration is `mcp.json` at the repository root. A manifest in this repository does not establish marketplace approval.
 
-| Tool | Description | Cost |
-|------|-------------|------|
-| `generate_report` | AI-powered novelty/patentability assessment for an invention idea | 720 credits |
-| `get_report_status` | Poll async report generation progress | Free |
-| `get_report_summary` | Executive summary with patentability verdict | Free |
-| `get_report_patent_analysis` | Detailed claim-by-claim comparison with cited prior art | Free |
+This preview has passed static checks and a separate hosted-service protocol smoke test. Installation, authentication, and tool use inside Cursor remain unverified.
 
-### Patent Content
+For local plugin testing, copy this version of the repository into `~/.cursor/plugins/local/goveda-patent/`, including the hidden `.cursor-plugin` directory. Restart Cursor or run **Developer: Reload Window**, then inspect **Customize**. Local plugin imports must be allowed. Do not also configure the same server manually: use one installation route to avoid duplicate connections. See [Cursor's local testing instructions](https://cursor.com/docs/plugins#test-plugins-locally).
 
-| Tool | Description | Cost |
-|------|-------------|------|
-| `get_patent` | Retrieve specific patent sections by publication number | 1 credit |
-| `batch_get_patents` | Retrieve multiple patents in one call | 1 credit/patent |
+If an approved marketplace listing becomes available, install it from **Customize**, select the desired scope, and authenticate with GoVeda.
 
-Available sections: `abstract`, `claims`, `description`, `dates`, `parties`, `classifications`, `legal_status`, `citations`, `family`, or `all`.
+## Account and usage
 
-### Account
+A GoVeda account is required. Hosted tool calls can consume GoVeda Subscription credits, shared with the GoVeda web app. Research tools can create search history, reports, or asynchronous jobs. Review the current [MCP pricing and account requirements](https://www.goveda.com/en/docs/agent/mcp-pricing) before running tools; read-only does not mean free. Do not assume every account is eligible for a new trial.
 
-| Tool | Description | Cost |
-|------|-------------|------|
-| `get_usage` | Check remaining credit balance and billing period | Free |
-| `start_free_trial` | Activate 14-day trial with 10,000 credits | Free |
+Current tool inputs, limits, supported data, and costs are maintained in the [MCP tool reference](https://www.goveda.com/en/docs/agent/mcp-tools) and pricing documentation. The authenticated server catalog determines which tools your client can use.
 
-## Example Prompts
+## Example prompts
 
-**Patent search:**
-> "Search for patents about wireless charging for electric vehicles"
+Use public patent material when trying the connection:
 
-**Prior art analysis:**
-> "Find prior art for patent US-20230001234-A1"
+- “Read the title, abstract, and filing date of US-10000000-B2. Include the publication reference and state any missing data.”
+- “Find patent classifications related to solid-state batteries.”
+- “Search for five patents about solid-state battery electrolytes for electric vehicles. Include publication numbers and source links, and distinguish retrieved facts from your interpretation.”
 
-**Patent content:**
-> "Show me the abstract and claims of US-11234567-B2"
+Patent research and AI-generated assessments are informational. Search coverage can be incomplete; these outputs do not establish novelty, patentability, validity, infringement, or freedom to operate. Seek qualified professional review for legal decisions.
 
-**Novelty report:**
-> "Generate a novelty report for: A solar panel with self-cleaning nano-coating that activates upon detecting dust accumulation using piezoelectric sensors"
+## Troubleshooting and disconnecting
 
-**Credit check:**
-> "Check my remaining credits"
+- **Sign-in canceled or denied:** return to Customize and reconnect when ready. Do not paste access tokens into chat or configuration.
+- **Expired or revoked access:** reconnect if Cursor cannot refresh the connection. If an error continues, provide support with the error code and approximate time, without credentials or private queries.
+- **Account, credits, or service error:** follow the server's error message and consult the current account/pricing documentation or support. Avoid repeatedly retrying a tool that may create jobs or consume credits.
+- **Disable:** toggle the MCP server off in Customize to stop exposing its tools to chat.
+- **Remove:** uninstall a marketplace plugin through Customize, or remove only the manually added server entry. For a local preview, remove the test plugin directory you created after disabling it. Preserve unrelated configuration.
 
-## Pricing
+Disabling or uninstalling a client is not proof that server-side authorization was revoked. GoVeda's MCP exposes OAuth token revocation; client support and behavior vary. For help ending authorization, contact [GoVeda support](https://www.goveda.com/contact). Never send support an access or refresh token.
 
-New users get a **14-day free trial with 10,000 credits** — no credit card required. Credits are shared between the MCP server and the [GoVeda web app](https://www.goveda.com).
+## Other MCP clients
 
-See [goveda.com/pricing](https://www.goveda.com/pricing) for plans.
+Use the current [GoVeda connection guide](https://www.goveda.com/en/docs/agent/mcp) for Claude, ChatGPT, and other supported clients. This avoids duplicating client-specific setup that may change.
 
-## Important Notes
+## Privacy, support, and license
 
-- Reports are AI-generated for informational purposes only. Professional legal review is recommended for patent decisions.
-- All tools include MCP safety annotations (`readOnlyHint`, `destructiveHint`, `title`).
-- Responses are truncated to 8,000 characters per field to limit data exposure.
+Tool arguments, including search text or patent references you send, are processed by GoVeda. Only send material you are authorized to share. The plugin contains no local executables, hooks, telemetry, or bundled skills; the hosted service's data handling is described in its privacy policy.
 
-## Links
-
-- [GoVeda](https://www.goveda.com) — Web application
-- [Documentation](https://www.goveda.com/docs/agent/mcp) — Full MCP server documentation
 - [Privacy Policy](https://www.goveda.com/privacy)
 - [Terms of Service](https://www.goveda.com/terms)
-- [Support](mailto:support@goveda.com)
+- [Support](https://www.goveda.com/contact)
+- [Connection guide](https://www.goveda.com/en/docs/agent/mcp)
 
-## License
-
-This repository contains documentation and configuration for the GoVeda Patent MCP Server. The server itself is a hosted service at `mcp.goveda.com`. See [Terms of Service](https://www.goveda.com/terms) for usage terms.
+Repository files are licensed under [Apache-2.0](LICENSE). Hosted-service access remains subject to GoVeda's Terms of Service and applicable account limits. GoVeda branding is used to identify this integration; no Cursor endorsement is claimed.
