@@ -1,0 +1,13 @@
+{
+  "name": "goveda-patent",
+  "displayName": "GoVeda Patent",
+  "version": "0.1.0",
+  "description": "Search patent records, read patent content, follow citations, and research prior art with GoVeda's hosted MCP.",
+  "author": { "name": "GoVeda" },
+  "homepage": "https://www.goveda.com/en/docs/agent/mcp",
+  "repository": "https://github.com/goveda/patent-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["patents", "patent-search", "prior-art", "research", "mcp"],
+  "logo": "assets/logo.png",
+  "mcpServers": "mcp.json"
+}
