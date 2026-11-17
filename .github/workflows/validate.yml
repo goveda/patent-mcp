@@ -1,0 +1,27 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: JSON syntax
+        run: for f in *.json .cursor-plugin/*.json; do python3 -m json.tool "$f" > /dev/null || exit 1; done
+
+      - name: server.json matches MCP registry schema
+        run: pipx run check-jsonschema --schemafile "$(jq -r '."$schema"' server.json)" server.json
+
+      - name: Cursor plugin references exist
+        run: |
+          for f in $(jq -r '.logo, .mcpServers' .cursor-plugin/plugin.json); do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
